@@ -1,142 +1,102 @@
 package com.example.madcw.Componnent
 
-import android.R
-import android.R.attr.contentDescription
-import android.content.res.Resources
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.media.Image
-import androidx.activity.SystemBarStyle.Companion.light
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.background
-import androidx.compose.foundation.content.MediaType.Companion.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CheckboxDefaults.colors
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
-import androidx.compose.ui.semantics.SemanticsProperties.ContentDescription
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.blue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.madcw.viewmodel.LoginViewModel
 
-
-
 @Composable
-fun LoginScreen(viewModel: LoginViewModel = viewModel(),modifier: Modifier= Modifier) {
-    var indexNumber by remember { mutableStateOf(" ") }
+fun LoginScreen(viewModel: LoginViewModel = viewModel(), modifier: Modifier = Modifier) {
+
+    var indexNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     val loginResponse by viewModel.loginResponse.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val context = LocalContext.current
 
-    Column (modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center){
-
-
-
-        Row {
-            Spacer(modifier = Modifier.height(  60.dp).width(110.dp))
-
+    LaunchedEffect(errorMessage) {
+        if (!errorMessage.isNullOrEmpty()) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
         }
-
-        Row {
-            Spacer(modifier = Modifier.height(  60.dp).width(110.dp))
-            Text(text = "Welcome",
-                fontSize = 40.sp,
-                fontStyle = FontStyle.Normal)
-        }
-        Row {
-            Spacer(modifier = Modifier.height(  60.dp).width(60.dp))
-            OutlinedTextField(
-                modifier = Modifier.height(60.dp)
-                    .width(300.dp),
-                value = indexNumber,
-                onValueChange = { indexNumber = it },
-                label = { Text("Enter Index Number") },
-
-
-                )
-        }
-        Spacer(modifier = Modifier.height(  20.dp))
-
-        Row {
-            Spacer(modifier = Modifier.height(  60.dp).width(60.dp))
-            OutlinedTextField(
-                modifier = Modifier.height(60.dp)
-                    .width(300.dp),
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Enter Password") },
-                )
-        }
-        Spacer(modifier = Modifier.height(  20.dp).width(10.dp))
-
-        Row {
-            Spacer(
-                modifier = Modifier
-                    .height(60.dp)
-                    .width(90.dp)
-            )
-
-            Button(
-                modifier = Modifier
-                    .height(40.dp)
-                    .width(250.dp),
-                onClick = {
-                    viewModel.loginUser(indexNumber, password)
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.holo_blue_dark)
-                ),
-                enabled = !isLoading
-            ) {
-                Text(if (isLoading) "Logging in..." else "Login")
-            }
-
-
-        }
-
     }
 
+    LaunchedEffect(loginResponse) {
+        loginResponse?.let {
+            Log.d("LoginScreen", "Login Success: ${it.fullName}")
+            Toast.makeText(context, "Welcome ${it.fullName}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Welcome",
+            fontSize = 40.sp,
+            modifier = Modifier.padding(start = 40.dp, bottom = 40.dp)
+        )
 
+        OutlinedTextField(
+            value = indexNumber,
+            onValueChange = { indexNumber = it },
+            label = { Text("Enter Index Number") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 40.dp)
+        )
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Enter Password") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 40.dp)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = {
+                viewModel.loginUser(indexNumber.trim(), password.trim())
+            },
+            enabled = !isLoading,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 40.dp)
+        ) {
+            Text(text = if (isLoading) "Logging in..." else "Login")
+        }
+
+        if (!errorMessage.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.height(15.dp))
+            Text(
+                text = errorMessage ?: "",
+                color = androidx.compose.ui.graphics.Color.Red,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun ScreenPreview(){
-    LoginScreen( modifier= Modifier)
-
+fun ScreenPreview() {
+    LoginScreen()
 }
