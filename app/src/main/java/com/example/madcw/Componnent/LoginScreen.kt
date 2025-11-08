@@ -12,10 +12,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.madcw.Entity.LoginRespones
 import com.example.madcw.viewmodel.LoginViewModel
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel = viewModel(), modifier: Modifier = Modifier) {
+fun LoginScreen(viewModel: LoginViewModel = viewModel(), modifier: Modifier = Modifier, onLoginSuccess: (LoginRespones) -> Unit ) {
 
     var indexNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -35,6 +36,7 @@ fun LoginScreen(viewModel: LoginViewModel = viewModel(), modifier: Modifier = Mo
         loginResponse?.let {
             Log.d("LoginScreen", "Login Success: ${it.fullName}")
             Toast.makeText(context, "Welcome ${it.fullName}", Toast.LENGTH_SHORT).show()
+            onLoginSuccess(it)
         }
     }
 
@@ -98,5 +100,5 @@ fun LoginScreen(viewModel: LoginViewModel = viewModel(), modifier: Modifier = Mo
 @Preview(showBackground = true)
 @Composable
 fun ScreenPreview() {
-    LoginScreen()
+    LoginScreen(onLoginSuccess = {})
 }

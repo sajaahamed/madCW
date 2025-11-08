@@ -62,6 +62,9 @@ dependencies {
     implementation((libs.okhttp.logging))
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation ("androidx.navigation:navigation-compose:2.8.3")
+    implementation ("androidx.compose.material:material-icons-extended:1.6.0")
+
 
 
 }

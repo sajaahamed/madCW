@@ -8,29 +8,55 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.navArgument
+import com.example.madcw.Componnent.CoursesScreen
+import com.example.madcw.Componnent.DegreesScreen
+import com.example.madcw.Componnent.HomeScreen
 import com.example.madcw.Componnent.LoginScreen
 import com.example.madcw.ui.theme.MadCWTheme
 import com.example.madcw.viewmodel.LoginViewModel
 
 class MainActivity : ComponentActivity() {
-    val loginViewModel: LoginViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MadCWTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginScreen(
-                        loginViewModel,modifier= Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+                val loginViewModel: LoginViewModel = viewModel()
+
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("login") {
+                        LoginScreen(viewModel = loginViewModel) { loginRes ->
+                            // Nav to successful login
+                            navController.navigate("home/${loginRes.fullName}") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        }
+                    }
+                    composable(
+                        "home/{fullName}",
+                        arguments = listOf(navArgument("fullName") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val fullName = backStackEntry.arguments?.getString("fullName") ?: ""
+                        HomeScreen(fullName = fullName,navController = navController)
+                    }
+                    composable("courses") {
+                        CoursesScreen()
+                    }
+                    composable("degrees") {
+                        DegreesScreen()
+                    }
+
                 }
             }
         }
     }
 }
-
